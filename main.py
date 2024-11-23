@@ -41,7 +41,7 @@ class WallpaperApp(QMainWindow):
         self.download_cycle_dropdown.addItems(["1 day", "2 days", "3 days", "5 days"])
         self.download_cycle_dropdown.setCurrentIndex(0)  # Default to "1 day"
 
-        self.start_button = QPushButton("Start")
+        self.start_button = QPushButton("ReStart")
         self.start_button.clicked.connect(self.start)
         # Initialize Start button with yellow background and black text, ensuring hovering works as expected
         self.start_button.setStyleSheet("""
@@ -90,6 +90,9 @@ class WallpaperApp(QMainWindow):
         # Timers
         self.wallpaper_timer = QTimer(self)
         self.download_timer = QTimer(self)
+
+        # start() will be called at the begining
+        self.start()
 
     def log(self, message):
         """Log a message to the console."""
