@@ -2,6 +2,7 @@ import os
 import random
 import ctypes
 import requests
+import subprocess
 from pathlib import Path
 from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, QComboBox, QPushButton, QLabel,
                                QTextEdit, QHBoxLayout)
@@ -21,6 +22,23 @@ def get_running_path(relative_path):
         return os.path.join('_internal', relative_path)
     else:
         return relative_path
+
+
+def set_permanent_wallpaper(wallpaper_path):
+    # Set the wallpaper using SystemParametersInfoW (temporarily)
+    ctypes.windll.user32.SystemParametersInfoW(20, 0, str(wallpaper_path), 0)
+
+    # PowerShell command to set the wallpaper path in the registry
+    ps_command = f'''
+    $wallpaperPath = "{wallpaper_path}"
+    $regKey = "HKCU:\\Control Panel\\Desktop"
+    Set-ItemProperty -Path $regKey -Name Wallpaper -Value $wallpaperPath
+    Set-ItemProperty -Path $regKey -Name WallpaperStyle -Value "2"  # 2 = Stretched, 0 = Centered, etc.
+    Set-ItemProperty -Path $regKey -Name TileWallpaper -Value "0"    # 0 = No tiling
+    '''
+
+    # Execute the PowerShell command to update the registry
+    subprocess.run(["powershell", "-Command", ps_command], check=True)
 
 class WallpaperApp(QMainWindow):
     def __init__(self):
@@ -135,7 +153,8 @@ class WallpaperApp(QMainWindow):
         wallpapers = list(WALLPAPER_DIR.glob("*.jpg"))
         if wallpapers:
             wallpaper = random.choice(wallpapers)
-            ctypes.windll.user32.SystemParametersInfoW(20, 0, str(wallpaper), 0)
+            # Set the wallpaper and make it permanent
+            set_permanent_wallpaper(wallpaper)
             self.log(f"Wallpaper changed to: {wallpaper.name}")
         else:
             self.log("No wallpapers available to set.")
