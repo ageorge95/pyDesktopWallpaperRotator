@@ -26,7 +26,7 @@ class WallpaperApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("pyDesktopWallpaperRotator v" + open(get_running_path('version.txt')).read())
-        self.setGeometry(100, 100, 500, 400)
+        self.setGeometry(100, 100, 700, 400)
         self.setWindowIcon(QIcon(get_running_path('icon.ico')))
 
         # GUI Elements
