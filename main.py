@@ -4,7 +4,8 @@ import ctypes
 import requests
 import subprocess
 from pathlib import Path
-from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, QComboBox, QPushButton, QLabel,
+from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout,
+                               QWidget, QComboBox, QPushButton, QLabel,
                                QTextEdit, QHBoxLayout)
 from PySide6.QtCore import QTimer, QDateTime
 from PySide6.QtGui import QIcon
@@ -37,8 +38,12 @@ def set_permanent_wallpaper(wallpaper_path):
     Set-ItemProperty -Path $regKey -Name TileWallpaper -Value "0"    # 0 = No tiling
     '''
 
-    # Execute the PowerShell command to update the registry
-    subprocess.run(["powershell", "-Command", ps_command], check=True)
+    # Execute the PowerShell command to update the registry without opening a command window
+    subprocess.run(
+        ["powershell", "-Command", ps_command],
+        check=True,
+        creationflags=subprocess.CREATE_NO_WINDOW
+    )
 
 class WallpaperApp(QMainWindow):
     def __init__(self):
