@@ -3,12 +3,17 @@ import random
 import ctypes
 import requests
 import subprocess
+import urllib3
+from urllib3.exceptions import InsecureRequestWarning
 from pathlib import Path
 from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout,
                                QWidget, QComboBox, QPushButton, QLabel,
                                QTextEdit, QHBoxLayout)
 from PySide6.QtCore import QTimer, QDateTime
 from PySide6.QtGui import QIcon
+
+# Suppress only the InsecureRequestWarning
+urllib3.disable_warnings(InsecureRequestWarning)
 
 # Constants
 CURRENT_DIR = Path.cwd()
@@ -167,8 +172,8 @@ class WallpaperApp(QMainWindow):
     def download_wallpapers(self):
         self.log("Starting wallpaper download...")
         try:
-            # Fetch Bing wallpaper data
-            response = requests.get(BING_API_URL)
+            # Fetch Bing wallpaper data, bypassing SSL verification
+            response = requests.get(BING_API_URL, verify=False)
             response.raise_for_status()
             data = response.json()
 
@@ -177,8 +182,8 @@ class WallpaperApp(QMainWindow):
             image_name = data["images"][0]["title"].replace(" ", "_") + ".jpg"
             image_path = WALLPAPER_DIR / image_name
 
-            # Download the image
-            with requests.get(image_url, stream=True) as img_response:
+            # Download the image, bypassing SSL verification
+            with requests.get(image_url, stream=True, verify=False) as img_response:
                 img_response.raise_for_status()
                 with open(image_path, "wb") as img_file:
                     for chunk in img_response.iter_content(1024):
@@ -187,7 +192,6 @@ class WallpaperApp(QMainWindow):
             self.log(f"Downloaded new wallpaper: {image_name}")
         except Exception as e:
             self.log(f"Failed to download wallpaper: {e}")
-
 
 # Run the app
 if __name__ == "__main__":
