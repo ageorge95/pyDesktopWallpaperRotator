@@ -19,6 +19,7 @@ urllib3.disable_warnings(InsecureRequestWarning)
 CURRENT_DIR = Path.cwd()
 WALLPAPER_DIR = CURRENT_DIR / "Wallpapers"
 BING_API_URL = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
+MAX_WALLPAPERS = 20
 
 # Ensure wallpaper directory exists
 WALLPAPER_DIR.mkdir(exist_ok=True)
@@ -28,7 +29,6 @@ def get_running_path(relative_path):
         return os.path.join('_internal', relative_path)
     else:
         return relative_path
-
 
 def set_permanent_wallpaper(wallpaper_path):
     # Set the wallpaper using SystemParametersInfoW (temporarily)
@@ -190,8 +190,37 @@ class WallpaperApp(QMainWindow):
                         img_file.write(chunk)
 
             self.log(f"Downloaded new wallpaper: {image_name}")
+
+            # After downloading, check and manage the number of wallpapers
+            self.manage_wallpapers()
+
         except Exception as e:
             self.log(f"Failed to download wallpaper: {e}")
+
+    def manage_wallpapers(self):
+        """Checks wallpaper count and deletes the oldest if the limit is exceeded."""
+        self.log("Checking wallpaper storage...")
+        try:
+            # Get all wallpapers and sort them by creation time (oldest first)
+            wallpapers = sorted(
+                WALLPAPER_DIR.glob("*.jpg"),
+                key=lambda f: f.stat().st_ctime
+            )
+
+            if len(wallpapers) > MAX_WALLPAPERS:
+                num_to_delete = len(wallpapers) - MAX_WALLPAPERS
+                self.log(
+                    f"Wallpaper count ({len(wallpapers)}) exceeds the limit of {MAX_WALLPAPERS}. Deleting {num_to_delete} oldest files.")
+
+                # Delete the oldest files
+                for i in range(num_to_delete):
+                    wallpaper_to_delete = wallpapers[i]
+                    wallpaper_to_delete.unlink()  # Deletes the file
+                    self.log(f"Deleted old wallpaper: {wallpaper_to_delete.name}")
+            else:
+                self.log(f"Wallpaper count ({len(wallpapers)}) is within the limit of {MAX_WALLPAPERS}.")
+        except Exception as e:
+            self.log(f"Error managing wallpapers: {e}")
 
 # Run the app
 if __name__ == "__main__":
