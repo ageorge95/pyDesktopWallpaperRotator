@@ -66,7 +66,7 @@ class WallpaperApp(QMainWindow):
 
         self.download_cycle_label = QLabel("Wallpaper Download Cycle:")
         self.download_cycle_dropdown = QComboBox()
-        self.download_cycle_dropdown.addItems(["1 day", "2 days", "3 days", "5 days"])
+        self.download_cycle_dropdown.addItems(["6 hours", "1 day", "2 days", "3 days", "5 days"])
         self.download_cycle_dropdown.setCurrentIndex(0)  # Default to "1 day"
 
         self.start_button = QPushButton("ReStart")
@@ -143,8 +143,8 @@ class WallpaperApp(QMainWindow):
 
         # Starting timers as seconds
         refresh_times = [30 * 60 * 1000, 60 * 60 * 1000, 4 * 60 * 60 * 1000, 12 * 60 * 60 * 1000]
-        download_times = [1 * 24 * 60 * 60 * 1000, 2 * 24 * 60 * 60 * 1000, 3 * 24 * 60 * 60 * 1000,
-                          5 * 24 * 60 * 60 * 1000]
+        download_times = [6 * 60 * 60 * 1000, 1 * 24 * 60 * 60 * 1000, 2 * 24 * 60 * 60 * 1000,
+                          3 * 24 * 60 * 60 * 1000, 5 * 24 * 60 * 60 * 1000]
 
         refresh_interval = refresh_times[self.refresh_cycle_dropdown.currentIndex()]
         download_interval = download_times[self.download_cycle_dropdown.currentIndex()]
