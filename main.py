@@ -1,4 +1,5 @@
 import os
+import sys
 import random
 import ctypes
 import requests
@@ -15,6 +16,9 @@ from PySide6.QtGui import QIcon
 # Suppress only the InsecureRequestWarning
 urllib3.disable_warnings(InsecureRequestWarning)
 
+APP_ID = 'AG95.pyDesktopWallpaperRotator'
+ICON_FILE = 'icon.ico'
+
 # Constants
 CURRENT_DIR = Path.cwd()
 WALLPAPER_DIR = CURRENT_DIR / "Wallpapers"
@@ -25,10 +29,19 @@ MAX_WALLPAPERS = 20
 WALLPAPER_DIR.mkdir(exist_ok=True)
 
 def get_running_path(relative_path):
-    if '_internal' in os.listdir():
-        return os.path.join('_internal', relative_path)
-    else:
-        return relative_path
+    """Return a bundled file's path in both source and PyInstaller builds."""
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+
+def set_windows_app_id():
+    """Give the app its own Windows taskbar identity."""
+    if sys.platform != 'win32':
+        return
+    try:
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
+    except (AttributeError, OSError):
+        pass
 
 def set_permanent_wallpaper(wallpaper_path):
     # Set the wallpaper using SystemParametersInfoW (temporarily)
@@ -55,7 +68,7 @@ class WallpaperApp(QMainWindow):
         super().__init__()
         self.setWindowTitle("pyDesktopWallpaperRotator v" + open(get_running_path('version.txt')).read())
         self.setGeometry(100, 100, 700, 400)
-        self.setWindowIcon(QIcon(get_running_path('icon.ico')))
+        self.setWindowIcon(QIcon(get_running_path(ICON_FILE)))
 
         # GUI Elements
         self.layout = QVBoxLayout()
@@ -224,7 +237,9 @@ class WallpaperApp(QMainWindow):
 
 # Run the app
 if __name__ == "__main__":
+    set_windows_app_id()
     app = QApplication([])
+    app.setWindowIcon(QIcon(get_running_path(ICON_FILE)))
     window = WallpaperApp()
     window.show()
     app.exec()
